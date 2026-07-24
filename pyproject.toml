@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "interview-prep"
+version = "0.1.0"
+description = "Per-problem marimo notebooks for FDE/DSA interview prep (strings, arrays, ...)."
+# Not a distributable library, just a managed environment for the notebooks.
+package-mode = false
+
+[tool.poetry.dependencies]
+python = ">=3.12"
+marimo = ">=0.23.3"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
