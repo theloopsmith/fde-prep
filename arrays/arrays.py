@@ -11,45 +11,58 @@ __generated_with = "0.23.9"
 app = marimo.App()
 
 
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    Sum all digits in a number
-    """)
-    return
-
-
 @app.cell
 def _():
-    def digit_sum(N):
-        total = 0
-        while N > 0:        # loops once per digit
-            total += N % 10  # grab last digit
-            N //= 10         # drop last digit
-        return total
+    import marimo as mo
 
-    print(digit_sum(1234))
-    return
+    return (mo,)
 
 
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    Find Maximum
+    # Arrays / lists — interview prep notebook
+
+    A self-contained reference. Each section is a short markdown header
+    followed by a runnable cell. Read top-to-bottom the first time; jump by
+    section when revisiting.
+
+    ## Table of contents
+    **Part A — Fundamentals**
+    1. Creating & indexing a list
+    2. Slicing (`start:stop:step`)
+    3. Mutate in place vs Rebind vs Copy
+
+    **Part B — The performance trap**
+    4. Removing elements: the mutate-while-iterating bug & O(n²) → O(n)
+
+    **Part C — Core algorithms**
+    5. Find the maximum
+    6. Count occurrences of a target
+    7. Rotate an array (right / left / unified)
+    8. Sum the digits of a number (modulo/divide warm-up)
+
+    **Appendix**
+    - Slicing primer (`arr[start:stop:step]`, negatives, the copy idiom)
+
+    ---
+    **Recurring theme:** lists are mutable, so the key question for every
+    operation is *does it mutate in place, rebind the name, or build a copy?*
+    Getting that wrong causes the classic mutate-while-iterating bug (Part B).
     """)
     return
 
 
-@app.cell
-def _():
-    def findMax(arr: list[int]):
-        max = -9999999
-        for i in arr:
-            if i > max:
-                max = i
-        return max  
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Part A — Fundamentals
 
-    print(findMax([2,21,-9,8,11]))
+    ### 1. Creating & indexing a list
+
+    `[0] * n` builds a length-n list of zeros. Indexing is O(1). Note the loop
+    below starts at index 1, so it intentionally skips `ar[0]`.
+    """)
     return
 
 
@@ -66,30 +79,65 @@ def _():
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    Find occurences:
-    Write a function that counts how many times a target value appears in an array of integers.
+    ### 2. Slicing (`start:stop:step`)
+
+    `arr[start:stop:step]` returns a NEW list. `stop` is exclusive; negative
+    indices count from the end; `step` can skip or (when negative) reverse.
+    See the Appendix for the full primer.
     """)
     return
 
 
 @app.cell
 def _():
-    def findOccurences(arr: list[int], key):
-        occ = 0
-        for i in arr:
-            if i == key:
-                occ += 1
-        return occ
+    k = [1,2,3,4,5,6,7]
 
-    print(findOccurences([2,21,-9,8,11, 21, 21], 21))
+    print(k[:])
+    print(k[1:])
+    print(k[2:-2:3])
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    Remove Element:
-    Write a function that removes all instances of a target value from an array, returning a new array without those elements.
+    ### 3. Mutate in place vs Rebind vs Copy
+
+    The mental model that decides whether the *caller* sees your change. This
+    is the crux of the remove-element bug in Part B.
+
+    ```
+      name  = value      -> REBIND: local name points at a new list;
+                            the caller's original list is UNTOUCHED.
+      name[:] = value    -> MUTATE IN PLACE: same list object, new contents;
+                            the caller SEES the change.
+      value[:] / list(value) / value.copy()
+                         -> COPY: an independent list.
+
+      a = [9, 9]         # rebind local name only (caller unaffected)
+      a[:] = [9, 9]      # mutate caller's list in place (caller sees it)
+      b = a              # ALIAS: same list -> mutating one shows in both
+      b = a[:]           # COPY: independent list (also list(a) / a.copy())
+
+    SHALLOW vs DEEP (nested lists):
+      a[:], list(a), a.copy()  -> shallow: outer copied, inner shared
+      copy.deepcopy(a)         -> fully independent (inner objects copied)
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Part B — The performance trap
+
+    ### 4. Removing elements
+
+    Write a function that removes all instances of a target value from an
+    array. Five variants walk from the classic **mutate-while-iterating bug**,
+    through the O(n²) `.remove()`-in-a-loop versions, to the O(n) comprehension
+    idioms — and show `arr[:] = ...` (mutate in place) vs `return [...]` (copy).
     """)
     return
 
@@ -172,8 +220,59 @@ def _():
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    Rotate Array
-    Write a function that rotates an array k positions to the right.
+    ## Part C — Core algorithms
+
+    ### 5. Find the maximum
+
+    One linear pass tracking the running max.
+    """)
+    return
+
+
+@app.cell
+def _():
+    def findMax(arr: list[int]):
+        max = -9999999
+        for i in arr:
+            if i > max:
+                max = i
+        return max  
+
+    print(findMax([2,21,-9,8,11]))
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### 6. Count occurrences of a target
+
+    Write a function that counts how many times a target value appears in an
+    array of integers.
+    """)
+    return
+
+
+@app.cell
+def _():
+    def findOccurences(arr: list[int], key):
+        occ = 0
+        for i in arr:
+            if i == key:
+                occ += 1
+        return occ
+
+    print(findOccurences([2,21,-9,8,11, 21, 21], 21))
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### 7. Rotate an array
+
+    Write a function that rotates an array k positions to the right. Built on
+    slicing (see Appendix): rotating right by k = last k elements moved front.
     """)
     return
 
@@ -244,13 +343,68 @@ def _():
     return
 
 
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### 8. Sum the digits of a number (modulo/divide warm-up)
+
+    Not an array problem, but the `% 10` / `// 10` digit-peeling loop is a
+    classic warm-up worth keeping in muscle memory.
+    """)
+    return
+
+
 @app.cell
 def _():
-    k = [1,2,3,4,5,6,7]
+    def digit_sum(N):
+        total = 0
+        while N > 0:        # loops once per digit
+            total += N % 10  # grab last digit
+            N //= 10         # drop last digit
+        return total
 
-    print(k[:])
-    print(k[1:])
-    print(k[2:-2:3])
+    print(digit_sum(1234))
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Appendix — Slicing primer (`arr[start:stop:step]`)
+
+    Slicing underpins rotate, remove, and the copy idiom, so it's worth
+    knowing cold. A slice always returns a NEW list; `stop` is EXCLUSIVE.
+
+    ```
+    arr = [0, 1, 2, 3, 4, 5, 6]
+           0  1  2  3  4  5  6     (indices from front)
+          -7 -6 -5 -4 -3 -2 -1     (indices from back)
+
+    arr[2:5]    -> [2, 3, 4]        start..stop-1
+    arr[:3]     -> [0, 1, 2]        start defaults to 0
+    arr[4:]     -> [4, 5, 6]        stop defaults to len
+    arr[:]      -> full COPY        (same as list(arr) / arr.copy())
+    arr[-2:]    -> [5, 6]           last 2 (used by rotate right)
+    arr[:-2]    -> [0, 1, 2, 3, 4]  all but last 2
+    arr[::2]    -> [0, 2, 4, 6]     every 2nd element
+    arr[::-1]   -> [6, 5, 4, 3, 2, 1, 0]   reversed (negative step)
+    arr[2:-2:3] -> [2, 5]           start 2, stop at index -2 (excl), step 3
+    ```
+
+    ### Quick-reference
+    | Slice | Meaning |
+    |---|---|
+    | `arr[a:b]` | elements a .. b-1 (b exclusive) |
+    | `arr[:]` | full shallow copy |
+    | `arr[-k:]` | last k elements |
+    | `arr[:-k]` | all but the last k |
+    | `arr[::-1]` | reversed copy |
+    | `arr[:] = [...]` | MUTATE contents in place (not a copy!) |
+
+    Gotchas: out-of-range slice bounds are CLAMPED (never raise), unlike plain
+    indexing which raises IndexError. And `arr[-0:]` is `arr[0:]` (the whole
+    list), which is why rotate guards the k==0 case explicitly.
+    """)
     return
 
 
