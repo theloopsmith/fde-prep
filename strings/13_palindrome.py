@@ -74,6 +74,7 @@ def _():
                 left += 1
             while left < right and not s[right].isalnum():
                 right -= 1
+            # casefold: caseless compare, folds ß->ss (stronger than lower())
             if s[left].casefold() != s[right].casefold():
                 return False
             left += 1

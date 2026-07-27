@@ -48,11 +48,65 @@ def _():
     # Time: O(n)   Space: O(1)  (fixed-size vowel set)
     def count_vowels_pythonic(s: str):
         vowels = set('aeiou')
+        # casefold: caseless compare, folds ß->ss (stronger than lower())
         return sum(ch in vowels for ch in s.casefold())
 
     print(count_vowels('hello world'))            # 3
     print(count_vowels_pythonic('hello world'))    # 3
     print(count_vowels_pythonic('AEiou XYZ'))      # 5
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Remove vowels
+
+    Same immutable-accumulation trap as reverse/build-with-join: growing a
+    string with `out = out + ch` in a loop is O(n²). Filter-then-`join` is
+    O(n); `str.translate` is the C-level fastest.
+    """)
+    return
+
+
+@app.cell
+def _():
+    import string
+    # Naive -- the O(n^2) TRAP: `out = out + ch` rebuilds the whole immutable
+    # string every iteration (copying the growing prefix). Also un-Pythonic:
+    # indexing via range(len(s)) instead of iterating the chars directly.
+    # Time: O(n^2)   Space: O(n)
+    def remove_vowels(s: str) -> str:
+        vowels = 'aeiouAEIOU'
+        out: str = ''
+        for i in range(len(s)):
+            if s[i] not in vowels:
+                out = out + s[i]
+        return out
+
+    # Tier 1 -- filter + join (idiomatic). Iterate chars directly, test
+    # membership against a set (O(1)), and join once so the result is built in
+    # a SINGLE allocation instead of n growing copies.
+    # Time: O(n)   Space: O(n)
+    def remove_vowels_pythonic(s: str) -> str:
+        vowels = set('aeiou')
+        # casefold: caseless compare, folds ß->ss (stronger than lower())
+        return ''.join(ch for ch in s if ch.casefold() not in vowels)
+
+    # Tier 2 -- str.translate (fastest). maketrans('', '', chars) builds a
+    # table that DELETES every listed char; translate applies it in one
+    # C-level pass. Maps by exact code point, so list BOTH cases explicitly
+    # ('aeiouAEIOU') -- it can't casefold on the fly.
+    # Time: O(n)   Space: O(n)
+    def remove_vowels_translate(s: str) -> str:
+        print(str.maketrans('', '', 'aeiouAEIOU'))
+        return s.translate(str.maketrans('', '', 'aeiouAEIOU'))
+
+    # Plain asserts keep this file dependency-free (no numpy needed).
+    assert remove_vowels('hello world') == 'hll wrld'
+    assert remove_vowels_pythonic('hello world') == 'hll wrld'
+    assert remove_vowels_translate('hello world') == 'hll wrld'
+    print(string.ascii_lowercase[1:])
     return
 
 
